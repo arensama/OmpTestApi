@@ -6,6 +6,7 @@ import (
 
 	"github.com/arensama/testapi/src/auth"
 	"github.com/arensama/testapi/src/blog"
+	"github.com/arensama/testapi/src/middlewares"
 	"github.com/arensama/testapi/src/user"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -25,17 +26,22 @@ func main() {
 	}
 	// Create a new router
 	router := mux.NewRouter()
-	// Use the user controller as an HTTP handler
 
 	router.PathPrefix("/auth").Handler(AuthController)
 
 	private := router.PathPrefix("/private").Subrouter()
-	// private.Use(func(next http.Handler) http.Handler {
-	// 	return middlewares.AuthMiddleware(next, userService.GetUserById)
-	// })
+	private.Use(middlewares.AuthMiddleware)
 
 	private.PathPrefix("/user").Handler(UserController)
 	private.PathPrefix("/blog").Handler(BlogController)
+
 	// Start the server
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
+
+// private.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+// 	// Get the user ID from the request URL parameters
+// 	// vars := mux.Vars(r)
+// 	// user := vars["user"]
+// 	fmt.Println("User profile for user", r.Context().Value("user"))
+// })

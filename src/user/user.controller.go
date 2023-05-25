@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -27,11 +28,11 @@ func Init(userService *UserService) *UserController {
 		router:      mux.NewRouter(),
 		userService: userService,
 	}
-	c.router.HandleFunc("/user", c.listUsers).Methods("GET")
-	c.router.HandleFunc("/user/{id}", c.getUser).Methods("GET")
-	c.router.HandleFunc("/user", c.createUser).Methods("POST")
-	c.router.HandleFunc("/user/{id}", c.updateUser).Methods("PUT")
-	c.router.HandleFunc("/user/{id}", c.deleteUser).Methods("DELETE")
+	c.router.HandleFunc("/private/user", c.listUsers).Methods("GET")
+	c.router.HandleFunc("/private/user/{id}", c.getUser).Methods("GET")
+	c.router.HandleFunc("/private/user", c.createUser).Methods("POST")
+	c.router.HandleFunc("/private/user/{id}", c.updateUser).Methods("PUT")
+	c.router.HandleFunc("/private/user/{id}", c.deleteUser).Methods("DELETE")
 	return &c
 }
 
@@ -45,6 +46,7 @@ func (c *UserController) listUsers(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to retrieve users", http.StatusInternalServerError)
 		return
 	}
+	fmt.Println("get user")
 	json.NewEncoder(w).Encode(users)
 }
 

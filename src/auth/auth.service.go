@@ -41,6 +41,18 @@ func GenerateToken(user user.User, secretKey string, expirationTime time.Time) (
 
 	return tokenString, nil
 }
+func hashPassword(password string) (string, error) {
+	// Generate a salt with a cost of 10
+	salt, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if err != nil {
+		return "", err
+	}
+
+	// Generate the hashed password with the salt
+	hashedPassword := string(salt)
+	return hashedPassword, nil
+}
+
 func ServiceInit(userService *user.UserService) *AuthService {
 	return &AuthService{
 		userService: userService,
@@ -64,7 +76,13 @@ func (s *AuthService) Signin(email, password string) (SigninRes, error) {
 	}
 	return res, err
 }
-func (s *AuthService) Signup() (any, error) {
+func (s *AuthService) Signup(name, surname, email, password string) (SigninRes, error) {
+	userInstance, err := s.userService.CreateUser(name, surname, email, password)
 
-	return true, nil
+	token, _ := GenerateToken(userInstance, os.Getenv("JWT_SECRET"), time.Now().AddDate(0, 0, 7))
+	res := SigninRes{
+		Email: userInstance.Email,
+		Token: token,
+	}
+	return res, err
 }

@@ -2,6 +2,7 @@ package blog
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -26,11 +27,8 @@ func Init(blogService *BlogService) *BlogController {
 		router:      mux.NewRouter(),
 		blogService: blogService,
 	}
-	c.router.HandleFunc("/blog", c.listBlogs).Methods("GET")
-	// c.router.HandleFunc("/blog/{id}", c.getUser).Methods("GET")
-	c.router.HandleFunc("/blog", c.createBlog).Methods("POST")
-	// c.router.HandleFunc("/blog/{id}", c.updateUser).Methods("PUT")
-	// c.router.HandleFunc("/blog/{id}", c.deleteUser).Methods("DELETE")
+	c.router.HandleFunc("/private/blog", c.listBlogs).Methods("GET")
+	c.router.HandleFunc("/private/blog", c.createBlog).Methods("POST")
 	return &c
 }
 func (c *BlogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +40,7 @@ func (c *BlogController) listBlogs(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to retrieve blogs", http.StatusInternalServerError)
 		return
 	}
+	fmt.Println("get blog")
 	json.NewEncoder(w).Encode(blogs)
 }
 func (c *BlogController) createBlog(w http.ResponseWriter, r *http.Request) {

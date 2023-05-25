@@ -12,7 +12,7 @@ type AuthController struct {
 	// userService *user.UserService
 	authService *AuthService
 }
-type Auth struct {
+type Signin struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -31,23 +31,36 @@ func (c *AuthController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *AuthController) singin(w http.ResponseWriter, r *http.Request) {
-	var credential Auth
+	var credential Signin
 	if err := json.NewDecoder(r.Body).Decode(&credential); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	user, err := c.authService.Signin(credential.Email, credential.Password)
+	result, err := c.authService.Signin(credential.Email, credential.Password)
 	if err != nil {
 		http.Error(w, "Failed to retrieve users", http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(result)
 }
+
+type Signup struct {
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Password string `json:"password"`
+}
+
 func (c *AuthController) signup(w http.ResponseWriter, r *http.Request) {
-	// users, err := c.userService.ListUsers()
-	// if err != nil {
-	// 	http.Error(w, "Failed to retrieve users", http.StatusInternalServerError)
-	// 	return
-	// }
-	// json.NewEncoder(w).Encode(users)
+	var body Signup
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	result, err := c.authService.Signup(body.Name, body.Surname, body.Email, body.Password)
+	if err != nil {
+		http.Error(w, "Failed to retrieve users", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(result)
 }
