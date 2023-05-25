@@ -16,7 +16,7 @@ var userService = user.ServiceInit()
 var UserController = user.Init(userService)
 var authService = auth.ServiceInit(userService)
 var AuthController = auth.Init(authService)
-var blogService = blog.ServiceInit()
+var blogService = blog.ServiceInit(userService)
 var BlogController = blog.Init(blogService)
 
 func main() {

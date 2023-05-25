@@ -19,30 +19,31 @@ func hashPassword(password string) (string, error) {
 }
 
 type UserService struct {
-	users []User
+	Users []User
 }
 
 func ServiceInit() *UserService {
 	pass, _ := hashPassword("password")
 	return &UserService{
-		users: []User{
+		Users: []User{
 			{
 				ID:       1,
 				Name:     "amirreza",
 				Surname:  "namazi",
 				Email:    "amirreza@gmail.com",
 				Password: pass,
+				Blogs:    []int{},
 			},
 		},
 	}
 }
 
 func (s *UserService) ListUsers() ([]User, error) {
-	return s.users, nil
+	return s.Users, nil
 }
 
 func (s *UserService) GetUser(id int) (User, error) {
-	for _, user := range s.users {
+	for _, user := range s.Users {
 		if user.ID == id {
 			return user, nil
 		}
@@ -50,7 +51,7 @@ func (s *UserService) GetUser(id int) (User, error) {
 	return User{}, errors.New("user not found")
 }
 func (s *UserService) GetUserByEmail(email string) (User, error) {
-	for _, user := range s.users {
+	for _, user := range s.Users {
 		if user.Email == email {
 			return user, nil
 		}
@@ -58,7 +59,7 @@ func (s *UserService) GetUserByEmail(email string) (User, error) {
 	return User{}, errors.New("user not found")
 }
 func (s *UserService) GetUserById(ID int) (User, error) {
-	for _, user := range s.users {
+	for _, user := range s.Users {
 		if user.ID == ID {
 			return user, nil
 		}
@@ -66,27 +67,35 @@ func (s *UserService) GetUserById(ID int) (User, error) {
 	return User{}, errors.New("user not found")
 }
 func (s *UserService) CreateUser(name, surname, email, password string) (User, error) {
-	id := len(s.users) + 1
+	id := len(s.Users) + 1
 	password, _ = hashPassword(password)
 	user := User{ID: id, Name: name, Surname: surname, Email: email, Password: password}
-	s.users = append(s.users, user)
+	s.Users = append(s.Users, user)
 	return user, nil
 }
 
 func (s *UserService) UpdateUser(user User) (User, error) {
-	for i, u := range s.users {
+	for i, u := range s.Users {
 		if u.ID == user.ID {
-			s.users[i] = user
+			s.Users[i] = user
 			return user, nil
 		}
 	}
 	return User{}, errors.New("user not found")
 }
-
+func (s *UserService) AddBlogToUser(userId, blogId int) (User, error) {
+	for i, u := range s.Users {
+		if u.ID == userId {
+			s.Users[i].Blogs = append(s.Users[i].Blogs, blogId)
+			return u, nil
+		}
+	}
+	return User{}, errors.New("user not found")
+}
 func (s *UserService) DeleteUser(id int) error {
-	for i, user := range s.users {
+	for i, user := range s.Users {
 		if user.ID == id {
-			s.users = append(s.users[:i], s.users[i+1:]...)
+			s.Users = append(s.Users[:i], s.Users[i+1:]...)
 			return nil
 		}
 	}

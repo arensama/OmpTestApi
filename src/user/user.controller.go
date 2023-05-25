@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/arensama/testapi/src/blog"
 	"github.com/gorilla/mux"
 )
 
@@ -15,12 +14,12 @@ type UserController struct {
 	userService *UserService
 }
 type User struct {
-	ID       int         `json:"id"`
-	Name     string      `json:"name"`
-	Surname  string      `json:"surname"`
-	Password string      `json:"-"`
-	Email    string      `json:"email"`
-	Blogs    []blog.Blog `json:"blogs"`
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Password string `json:"-"`
+	Email    string `json:"email"`
+	Blogs    []int  `json:"blogs"`
 }
 
 func Init(userService *UserService) *UserController {
