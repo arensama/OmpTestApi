@@ -6,9 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/arensama/testapi/src/user"
+	"github.com/arensama/testapi/src/model"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
 type BlogController struct {
@@ -18,11 +17,6 @@ type BlogController struct {
 }
 
 type Blog struct {
-	gorm.Model
-	Title  string `json:"title"`
-	Body   string `json:"body"`
-	UserID uint
-	User   user.User
 }
 
 func Init(blogService *BlogService) *BlogController {
@@ -49,7 +43,7 @@ func (c *BlogController) listBlogs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		page = 1
 	}
-	blogs, err := c.blogService.BlogLists(limit, page, req_user.(user.User))
+	blogs, err := c.blogService.BlogLists(limit, page, req_user.(model.User))
 	if err != nil {
 		http.Error(w, "Failed to retrieve blogs", http.StatusInternalServerError)
 		return
@@ -60,7 +54,7 @@ func (c *BlogController) listBlogs(w http.ResponseWriter, r *http.Request) {
 func (c *BlogController) userBlogs(w http.ResponseWriter, r *http.Request) {
 
 	req_user := r.Context().Value("user")
-	blogs, err := c.blogService.UserBlogs(req_user.(user.User))
+	blogs, err := c.blogService.UserBlogs(req_user.(model.User))
 	if err != nil {
 		http.Error(w, "Failed to retrieve blogs", http.StatusInternalServerError)
 		return
@@ -71,12 +65,12 @@ func (c *BlogController) userBlogs(w http.ResponseWriter, r *http.Request) {
 func (c *BlogController) createBlog(w http.ResponseWriter, r *http.Request) {
 	req_user := r.Context().Value("user")
 
-	var blog Blog
+	var blog model.Blog
 	if err := json.NewDecoder(r.Body).Decode(&blog); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	createdBlog, err := c.blogService.CreateBlog(blog.Title, blog.Body, req_user.(user.User))
+	createdBlog, err := c.blogService.CreateBlog(blog.Title, blog.Body, req_user.(model.User))
 	if err != nil {
 		http.Error(w, "Failed to create blog", http.StatusInternalServerError)
 		return

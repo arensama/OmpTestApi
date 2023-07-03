@@ -2,6 +2,7 @@ package blog
 
 import (
 	"github.com/arensama/testapi/src/db"
+	"github.com/arensama/testapi/src/model"
 	"github.com/arensama/testapi/src/user"
 )
 
@@ -12,7 +13,7 @@ import (
 // 	if err.Error != nil {
 // 		return user.User{}, errors.New("cant create user ")
 // 	}
-// 	userblogInstance := UserBlog{
+// 	userblogInstance := Usermodel.Blog{
 // 		UserID: userId,
 // 		BlogID: blogId,
 // 	}
@@ -27,26 +28,26 @@ type BlogService struct {
 }
 
 func ServiceInit(userService *user.UserService, db *db.DB) *BlogService {
-	db.Migrate(Blog{})
+	db.Migrate(model.Blog{})
 	return &BlogService{
 		userService: userService,
 		db:          db,
 	}
 }
 
-func (s *BlogService) BlogLists(limit, page int, req_user user.User) ([]Blog, error) {
+func (s *BlogService) BlogLists(limit, page int, req_user model.User) ([]model.Blog, error) {
 	db := s.db.Db
-	var blogs []Blog
-	err := db.Limit(limit).Offset((page - 1) * limit).Find(&blogs)
+	var blogs []model.Blog
+	err := db.Preload("User").Limit(limit).Offset((page - 1) * limit).Find(&blogs)
 	if err.Error != nil {
-		return []Blog{}, err.Error
+		return []model.Blog{}, err.Error
 	}
 	return blogs, nil
 }
 
-func (s *BlogService) CreateBlog(title, body string, req_user user.User) (Blog, error) {
+func (s *BlogService) CreateBlog(title, body string, req_user model.User) (model.Blog, error) {
 	db := s.db.Db
-	blogInstance := Blog{
+	blogInstance := model.Blog{
 		Title:  title,
 		Body:   body,
 		UserID: req_user.ID,
@@ -54,13 +55,13 @@ func (s *BlogService) CreateBlog(title, body string, req_user user.User) (Blog, 
 	}
 	err := db.Create(&blogInstance)
 	if err.Error != nil {
-		return Blog{}, err.Error
+		return model.Blog{}, err.Error
 	}
 	// s.AddBlogToUser(req_user.ID, blogInstance.ID)
 	return blogInstance, nil
 }
 
-func (s *BlogService) UserBlogs(req_user user.User) ([]Blog, error) {
+func (s *BlogService) UserBlogs(req_user model.User) ([]model.Blog, error) {
 	// db := s.db.Db
 	// var userInstance user.User
 	// // var blogI Blog
@@ -69,5 +70,5 @@ func (s *BlogService) UserBlogs(req_user user.User) ([]Blog, error) {
 	// if err != nil {
 	// 	return []interfaces.BlogInterface{}, err
 	// }
-	return []Blog{}, nil
+	return []model.Blog{}, nil
 }

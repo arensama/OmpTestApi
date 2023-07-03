@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/arensama/testapi/src/user"
+	"github.com/arensama/testapi/src/model"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type getUserByIDFunc func(id int) (user.User, error)
+type getUserByIDFunc func(id int) (model.User, error)
 
-func validateToken(tokenString string) (user.User, error) {
+func validateToken(tokenString string) (model.User, error) {
 	// Parse the token string and verify the signature
 	claims := jwt.MapClaims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
@@ -23,13 +23,13 @@ func validateToken(tokenString string) (user.User, error) {
 	})
 
 	if err != nil {
-		return user.User{}, errors.New("invalid token")
+		return model.User{}, errors.New("invalid token")
 	}
 
 	// Get the claims from the token
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		return user.User{}, errors.New("invalid token claims")
+		return model.User{}, errors.New("invalid token claims")
 	}
 	// Check if the token has expired
 
@@ -37,9 +37,9 @@ func validateToken(tokenString string) (user.User, error) {
 	// expireTime := *p
 	// fmt.Println("time", expireTime)
 	// if time.Now().Unix() > int64(expireTime.Second()) {
-	// 	return user.User{}, errors.New("token has expired")
+	// 	return model.User{}, errors.New("token has expired")
 	// }
-	userInstance := user.User{}
+	userInstance := model.User{}
 	userInstance.ID = uint(claims["id"].(float64))
 	userInstance.Name = string(claims["name"].(string))
 	userInstance.Email = string(claims["email"].(string))

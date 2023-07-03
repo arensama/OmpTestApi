@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/arensama/testapi/src/model"
 	"github.com/arensama/testapi/src/user"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -22,7 +23,7 @@ func checkPassword(password, hashedPassword string) error {
 
 	return nil
 }
-func GenerateToken(user user.User, secretKey string, expirationTime time.Time) (string, error) {
+func GenerateToken(user model.User, secretKey string, expirationTime time.Time) (string, error) {
 	// Create a new token object
 	token := jwt.New(jwt.SigningMethodHS256)
 

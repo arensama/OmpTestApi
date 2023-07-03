@@ -6,27 +6,16 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/arensama/testapi/src/model"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
-type BlogInterface interface {
-	BlogLists() any
-	CreateBlog() any
-	UserBlogs() any
-}
 type UserController struct {
 	router      *mux.Router
 	userService *UserService
 }
 
 type User struct {
-	gorm.Model
-	Name     string          `json:"name"`
-	Surname  string          `json:"surname" `
-	Password string          `json:"-" gorm:"not null"`
-	Email    string          `json:"email" gorm:"unique_index;not null" `
-	Blogs    []BlogInterface `gorm:"foreignKey:UserID"`
 }
 
 func Init(userService *UserService) *UserController {
@@ -72,7 +61,7 @@ func (c *UserController) getUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserController) createUser(w http.ResponseWriter, r *http.Request) {
-	var user User
+	var user model.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -93,7 +82,7 @@ func (c *UserController) updateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	var updatedUser User
+	var updatedUser model.User
 	if err := json.NewDecoder(r.Body).Decode(&updatedUser); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return

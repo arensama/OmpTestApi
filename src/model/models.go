@@ -8,8 +8,8 @@ type Blog struct {
 	gorm.Model
 	Title  string `json:"title"`
 	Body   string `json:"body"`
-	UserID uint
-	User   User
+	UserID uint   `json:"-" `
+	User   User   `json:"-" `
 }
 type User struct {
 	gorm.Model
@@ -17,5 +17,5 @@ type User struct {
 	Surname  string `json:"surname" `
 	Password string `json:"-" gorm:"not null"`
 	Email    string `json:"email" gorm:"unique_index;not null" `
-	Blogs    []Blog `gorm:"foreignKey:UserID"`
+	Blogs    []Blog `json:"blogs" gorm:"foreignKey:UserID"`
 }
