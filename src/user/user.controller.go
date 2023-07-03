@@ -7,19 +7,26 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 )
 
+type BlogInterface interface {
+	BlogLists() any
+	CreateBlog() any
+	UserBlogs() any
+}
 type UserController struct {
 	router      *mux.Router
 	userService *UserService
 }
+
 type User struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Surname  string `json:"surname"`
-	Password string `json:"-"`
-	Email    string `json:"email"`
-	Blogs    []int  `json:"blogs"`
+	gorm.Model
+	Name     string          `json:"name"`
+	Surname  string          `json:"surname" `
+	Password string          `json:"-" gorm:"not null"`
+	Email    string          `json:"email" gorm:"unique_index;not null" `
+	Blogs    []BlogInterface `gorm:"foreignKey:UserID"`
 }
 
 func Init(userService *UserService) *UserController {
@@ -40,7 +47,7 @@ func (c *UserController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserController) listUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := c.userService.ListUsers()
+	users, err := c.userService.UserLists()
 	if err != nil {
 		http.Error(w, "Failed to retrieve users", http.StatusInternalServerError)
 		return
@@ -56,7 +63,7 @@ func (c *UserController) getUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	user, err := c.userService.GetUser(id)
+	user, err := c.userService.GetUser(uint(id))
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -91,7 +98,7 @@ func (c *UserController) updateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	updatedUser.ID = id
+	updatedUser.ID = uint(id)
 	user, err := c.userService.UpdateUser(updatedUser)
 	if err != nil {
 		http.NotFound(w, r)
@@ -107,7 +114,7 @@ func (c *UserController) deleteUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
-	if err := c.userService.DeleteUser(id); err != nil {
+	if err := c.userService.DeleteUser(uint(id)); err != nil {
 		http.NotFound(w, r)
 		return
 	}

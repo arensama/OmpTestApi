@@ -1,8 +1,9 @@
 package user
 
 import (
-	"errors"
+	"fmt"
 
+	"github.com/arensama/testapi/src/db"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,85 +20,89 @@ func hashPassword(password string) (string, error) {
 }
 
 type UserService struct {
-	Users []User
+	db *db.DB
 }
 
-func ServiceInit() *UserService {
-	pass, _ := hashPassword("password")
+func ServiceInit(db *db.DB) *UserService {
+	db.Migrate(User{})
 	return &UserService{
-		Users: []User{
-			{
-				ID:       1,
-				Name:     "amirreza",
-				Surname:  "namazi",
-				Email:    "amirreza@gmail.com",
-				Password: pass,
-				Blogs:    []int{},
-			},
-		},
+		db: db,
 	}
 }
 
-func (s *UserService) ListUsers() ([]User, error) {
-	return s.Users, nil
+func (s *UserService) UserLists() ([]User, error) {
+	db := s.db.Db
+	var users []User
+	err := db.Find(&users)
+	if err.Error != nil {
+		return []User{}, err.Error
+	}
+	return users, nil
 }
 
-func (s *UserService) GetUser(id int) (User, error) {
-	for _, user := range s.Users {
-		if user.ID == id {
-			return user, nil
-		}
+func (s *UserService) GetUser(id uint) (User, error) {
+	db := s.db.Db
+	var user User
+	err := db.Find(&user)
+	if err.Error != nil {
+		return User{}, err.Error
 	}
-	return User{}, errors.New("user not found")
+	return user, nil
+
 }
 func (s *UserService) GetUserByEmail(email string) (User, error) {
-	for _, user := range s.Users {
-		if user.Email == email {
-			return user, nil
-		}
+	db := s.db.Db
+	var userInstance User
+	err := db.Where("email = ?", email).First(&userInstance)
+	if err.Error != nil {
+		return User{}, err.Error
 	}
-	return User{}, errors.New("user not found")
+	return userInstance, nil
 }
-func (s *UserService) GetUserById(ID int) (User, error) {
-	for _, user := range s.Users {
-		if user.ID == ID {
-			return user, nil
-		}
+func (s *UserService) GetUserById(ID uint) (User, error) {
+	db := s.db.Db
+	var user User
+	err := db.Find(&user)
+	if err.Error != nil {
+		return User{}, err.Error
 	}
-	return User{}, errors.New("user not found")
+	return user, nil
 }
 func (s *UserService) CreateUser(name, surname, email, password string) (User, error) {
-	id := len(s.Users) + 1
+	db := s.db.Db
+	fmt.Println("passworfd", password)
 	password, _ = hashPassword(password)
-	user := User{ID: id, Name: name, Surname: surname, Email: email, Password: password}
-	s.Users = append(s.Users, user)
+	fmt.Println("passworfd2", password)
+	// Create a new user
+	user := User{
+		Name:     name,
+		Surname:  surname,
+		Email:    email,
+		Password: password,
+	}
+	err := db.Create(&user)
+	if err.Error != nil {
+		return User{}, err.Error
+	}
 	return user, nil
 }
 
 func (s *UserService) UpdateUser(user User) (User, error) {
-	for i, u := range s.Users {
-		if u.ID == user.ID {
-			s.Users[i] = user
-			return user, nil
-		}
+	db := s.db.Db
+	var userI User
+	err := db.Find(&userI, user.ID)
+	if err.Error != nil {
+		return User{}, err.Error
 	}
-	return User{}, errors.New("user not found")
+	db.Save(&user)
+	if err.Error != nil {
+		return User{}, err.Error
+	}
+	return user, nil
 }
-func (s *UserService) AddBlogToUser(userId, blogId int) (User, error) {
-	for i, u := range s.Users {
-		if u.ID == userId {
-			s.Users[i].Blogs = append(s.Users[i].Blogs, blogId)
-			return u, nil
-		}
-	}
-	return User{}, errors.New("user not found")
-}
-func (s *UserService) DeleteUser(id int) error {
-	for i, user := range s.Users {
-		if user.ID == id {
-			s.Users = append(s.Users[:i], s.Users[i+1:]...)
-			return nil
-		}
-	}
-	return errors.New("user not found")
+
+func (s *UserService) DeleteUser(id uint) error {
+	db := s.db.Db
+	err := db.Delete(&User{}, id)
+	return err.Error
 }

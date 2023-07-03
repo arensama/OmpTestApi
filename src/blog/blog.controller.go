@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/arensama/testapi/src/user"
 	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 )
 
 type BlogController struct {
@@ -16,12 +16,13 @@ type BlogController struct {
 	// userService *user.UserService
 	blogService *BlogService
 }
+
 type Blog struct {
-	ID        int       `json:"id"`
-	Title     string    `json:"title"`
-	Body      string    `json:"body"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	gorm.Model
+	Title  string `json:"title"`
+	Body   string `json:"body"`
+	UserID uint
+	User   user.User
 }
 
 func Init(blogService *BlogService) *BlogController {
@@ -42,15 +43,13 @@ func (c *BlogController) listBlogs(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	limit, err := strconv.Atoi(vars["limit"])
 	if err != nil {
-		http.Error(w, "Invalid limit", http.StatusBadRequest)
-		return
+		limit = 10
 	}
 	page, err := strconv.Atoi(vars["page"])
 	if err != nil {
-		http.Error(w, "Invalid page", http.StatusBadRequest)
-		return
+		page = 1
 	}
-	blogs, err := c.blogService.ListBlogs(limit, page, req_user.(user.User))
+	blogs, err := c.blogService.BlogLists(limit, page, req_user.(user.User))
 	if err != nil {
 		http.Error(w, "Failed to retrieve blogs", http.StatusInternalServerError)
 		return

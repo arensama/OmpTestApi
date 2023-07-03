@@ -66,9 +66,15 @@ type SigninRes struct {
 
 func (s *AuthService) Signin(email, password string) (SigninRes, error) {
 	userInstance, err := s.userService.GetUserByEmail(email)
+	if err != nil {
+
+		return SigninRes{}, err
+	}
+
 	if err := checkPassword(password, userInstance.Password); err != nil {
 		return SigninRes{}, err
 	}
+
 	token, _ := GenerateToken(userInstance, os.Getenv("JWT_SECRET"), time.Now().AddDate(0, 0, 7))
 	res := SigninRes{
 		Email: userInstance.Email,

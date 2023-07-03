@@ -6,20 +6,24 @@ import (
 
 	"github.com/arensama/testapi/src/auth"
 	"github.com/arensama/testapi/src/blog"
+	"github.com/arensama/testapi/src/db"
 	"github.com/arensama/testapi/src/middlewares"
 	"github.com/arensama/testapi/src/user"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
-var userService = user.ServiceInit()
+var DB = db.Init()
+
+var userService = user.ServiceInit(DB)
 var UserController = user.Init(userService)
 var authService = auth.ServiceInit(userService)
 var AuthController = auth.Init(authService)
-var blogService = blog.ServiceInit(userService)
+var blogService = blog.ServiceInit(userService, DB)
 var BlogController = blog.Init(blogService)
 
 func main() {
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)

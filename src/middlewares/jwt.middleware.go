@@ -40,7 +40,7 @@ func validateToken(tokenString string) (user.User, error) {
 	// 	return user.User{}, errors.New("token has expired")
 	// }
 	userInstance := user.User{}
-	userInstance.ID = int(claims["id"].(float64))
+	userInstance.ID = uint(claims["id"].(float64))
 	userInstance.Name = string(claims["name"].(string))
 	userInstance.Email = string(claims["email"].(string))
 	return userInstance, nil
