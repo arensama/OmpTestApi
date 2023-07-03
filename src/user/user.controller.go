@@ -36,7 +36,15 @@ func (c *UserController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserController) listUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := c.userService.UserLists()
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	if err != nil {
+		limit = 10
+	}
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil {
+		page = 1
+	}
+	users, err := c.userService.UserLists(limit, page)
 	if err != nil {
 		http.Error(w, "Failed to retrieve users", http.StatusInternalServerError)
 		return

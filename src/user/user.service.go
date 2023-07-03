@@ -31,10 +31,10 @@ func ServiceInit(db *db.DB) *UserService {
 	}
 }
 
-func (s *UserService) UserLists() ([]model.User, error) {
+func (s *UserService) UserLists(limit, page int) ([]model.User, error) {
 	db := s.db.Db
 	var users []model.User
-	err := db.Preload("Blogs").Find(&users)
+	err := db.Preload("Blogs").Limit(limit).Offset((page - 1) * limit).Find(&users)
 	if err.Error != nil {
 		return []model.User{}, err.Error
 	}

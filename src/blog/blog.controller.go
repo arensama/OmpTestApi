@@ -34,12 +34,11 @@ func (c *BlogController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 func (c *BlogController) listBlogs(w http.ResponseWriter, r *http.Request) {
 	req_user := r.Context().Value("user")
-	vars := mux.Vars(r)
-	limit, err := strconv.Atoi(vars["limit"])
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
 	if err != nil {
 		limit = 10
 	}
-	page, err := strconv.Atoi(vars["page"])
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
 		page = 1
 	}

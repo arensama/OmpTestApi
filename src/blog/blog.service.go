@@ -62,13 +62,13 @@ func (s *BlogService) CreateBlog(title, body string, req_user model.User) (model
 }
 
 func (s *BlogService) UserBlogs(req_user model.User) ([]model.Blog, error) {
-	// db := s.db.Db
-	// var userInstance user.User
-	// // var blogI Blog
-	// // _ = db.Preload("User").Where("id = ?", req_user.ID).First(&blogI).Error
-	// err := db.Preload("Blogs").Where("id = ?", req_user.ID).First(&userInstance).Error
-	// if err != nil {
-	// 	return []interfaces.BlogInterface{}, err
-	// }
-	return []model.Blog{}, nil
+	db := s.db.Db
+	var userInstance model.User
+	// var blogI Blog
+	// _ = db.Preload("User").Where("id = ?", req_user.ID).First(&blogI).Error
+	err := db.Preload("Blogs").Where("id = ?", req_user.ID).First(&userInstance).Error
+	if err != nil {
+		return []model.Blog{}, err
+	}
+	return userInstance.Blogs, nil
 }
